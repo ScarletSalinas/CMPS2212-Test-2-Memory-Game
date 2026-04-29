@@ -38,32 +38,54 @@
 export function createEventEmitter() {
   // TODO (1): create the private listeners store here.
   //           It should be an object mapping event name → array of listeners.
+  const listeners = {}; 
 
 
   function on(eventName, listener) {
     // TODO (2):
-    //   - If no array exists yet for `eventName`, create one.
-    //   - Push `listener` into that array.
+
     //   - Validate that `listener` is a function; otherwise throw a
-    //     TypeError with a clear message (fail loud, fail early).
+    
+    if (typeof listener !== "function") {
+      throw new TypeError("Listener must be a function"); //     TypeError with a clear message (fail loud, fail early).
+    }
+
+    //   - If no array exists yet for `eventName`, create one.
+    if (!listeners[eventName]) {
+      listeners[eventName] = [];
+    }
+    listeners[eventName].push(listener); //   - Push `listener` into that array.
 
   }
 
   function off(eventName, listener) {
     // TODO (3):
     //   - If there is no array for `eventName`, return quietly.
+    if (!listeners[eventName]) {
+      return;
+    }
     //   - Otherwise remove ONLY the matching listener reference.
     //   - Do not mutate the array in place in a way that breaks a
     //     concurrent `emit` iteration — filter into a new array instead.
+    listeners[eventName] = listeners[eventName].filter((l) => l !== listener);
 
   }
 
   function emit(eventName, payload) {
     // TODO (4):
     //   - If no listeners are registered for `eventName`, return.
+    if (!listeners[eventName]) {
+      return;
+    }
     //   - Otherwise call every listener with `payload`.
-    //   - Wrap each call in a try/catch so one bad listener does not
-    //     break the others. Log errors with console.error.
+    listeners[eventName].forEach((listener) => {
+      //   - Wrap each call in a try/catch so one bad listener does not break other errors.
+      try {
+        listener(payload);
+      } catch (error) {
+        console.error("Error in listener for event:", eventName, error); // - Log errors with console.error.
+      }
+    });
 
   }
 
